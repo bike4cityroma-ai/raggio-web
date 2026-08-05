@@ -48,6 +48,10 @@ textarea::placeholder { color:#8b9994; }
 .send:disabled { cursor:not-allowed; opacity:.45; }
 .privacy-line { margin:8px 5px 0; text-align:center; color:var(--muted); font-size:11px; }
 .setup-warning { padding:10px 14px; background:#fff1d7; color:#705018; font-size:12px; text-align:center; }
+.workshop-contact { align-self:stretch; display:flex; flex-direction:column; gap:8px; padding:16px; border:1px solid rgba(22,120,74,.24); border-radius:18px; background:#f1f7ed; color:var(--ink); }
+.workshop-contact span { color:var(--muted); font-size:13px; line-height:1.45; }
+.workshop-contact a { display:block; margin-top:3px; padding:12px 16px; border-radius:999px; background:#16784a; color:white; text-align:center; text-decoration:none; font-weight:900; }
+.workshop-contact a:hover,.workshop-contact a:focus-visible { background:#105d39; outline:3px solid rgba(116,183,46,.35); }
 .details { background:var(--cream); color:var(--ink); padding:68px 26px; }
 .details-inner { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1fr 1.4fr; gap:70px; }
 .details h2 { margin:0; font-family:Georgia,serif; font-size:clamp(34px,4vw,55px); font-weight:500; }

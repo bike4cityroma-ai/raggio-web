@@ -7,7 +7,7 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 
 type Role = "USER" | "ASSISTANT";
 type Message = { id: string; role: Role; text: string; safety?: "SAFE" | "CAUTION" | "STOP" };
-type ResponseData = { assistantMessage:string; safetyLevel:"SAFE"|"CAUTION"|"STOP"; category:string; quickReplies:string[]; conversationCompleted:boolean };
+type ResponseData = { assistantMessage:string; safetyLevel:"SAFE"|"CAUTION"|"STOP"; outcome:"UNDETERMINED"|"GREEN"|"YELLOW"|"RED"; category:string; quickReplies:string[]; conversationCompleted:boolean };
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -28,6 +28,7 @@ export function RaggioApp() {
   const [sessionId,setSessionId] = useState(newId);
   const [input,setInput] = useState("");
   const [loading,setLoading] = useState(false);
+  const [showWorkshopContact,setShowWorkshopContact] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const isEmbed = useMemo(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("embed") === "1",[]);
 
@@ -35,7 +36,7 @@ export function RaggioApp() {
 
   function resetChat() {
     setMessages([welcome]); setQuickReplies(["Sento un rumore","La bici frena male","Ho una gomma sgonfia"]);
-    setCategory(null); setSessionId(newId()); setInput("");
+    setCategory(null); setSessionId(newId()); setInput(""); setShowWorkshopContact(false);
   }
 
   async function send(text:string) {
@@ -62,6 +63,7 @@ export function RaggioApp() {
       setMessages((current) => [...current,{id:newId(),role:"ASSISTANT",text:data.assistantMessage,safety:data.safetyLevel}]);
       setQuickReplies(data.conversationCompleted ? [] : data.quickReplies ?? []);
       setCategory(data.category);
+      setShowWorkshopContact(data.conversationCompleted && (data.outcome === "YELLOW" || data.outcome === "RED"));
     } catch {
       setMessages((current) => [...current,{id:newId(),role:"ASSISTANT",safety:"CAUTION",text:"Il servizio è temporaneamente non disponibile. Nessuna diagnosi è stata prodotta: attendi qualche secondo e riprova."}]);
     } finally { setLoading(false); }
@@ -88,6 +90,11 @@ export function RaggioApp() {
           {messages.map((message) => <div key={message.id} className={`message ${message.role === "USER" ? "user" : "assistant"}${message.safety === "STOP" ? " stop" : ""}`}><div className="message-label">{message.role === "USER" ? "Tu" : message.safety === "STOP" ? "Fermati" : "RAGGIÒ"}</div>{message.text}</div>)}
           {!loading && quickReplies.length > 0 && <div className="quick-replies">{quickReplies.map((reply) => <button type="button" className="quick-reply" key={reply} onClick={() => void send(reply)}>{reply}</button>)}</div>}
           {loading && <div className="typing" aria-label="Raggiò sta scrivendo"><span/><span/><span/></div>}<div ref={endRef}/>
+          {showWorkshopContact && <aside className="workshop-contact" aria-label="Contatta la ciclofficina">
+            <strong>Ti consigliamo di passare in ciclofficina.</strong>
+            <span>Scrivici subito su WhatsApp per concordare un controllo della bici.</span>
+            <a href="https://wa.me/393516849832?text=Ciao%2C%20ho%20appena%20completato%20una%20diagnosi%20con%20Raggi%C3%B2%20e%20vorrei%20far%20controllare%20la%20mia%20bici." target="_blank" rel="noreferrer">Contatta su WhatsApp</a>
+          </aside>}
         </div>
         <form className="composer-wrap" onSubmit={submit}><div className="composer"><textarea value={input} onChange={(e)=>setInput(e.target.value)} onKeyDown={onKeyDown} maxLength={1000} rows={1} placeholder="Descrivi il problema della tua bici…" aria-label="Messaggio per RAGGIO" disabled={loading}/><button className="send" type="submit" disabled={!input.trim()||loading} aria-label="Invia messaggio">↑</button></div><div className="privacy-line">Non inserire dati personali. Le risposte possono contenere errori.</div></form>
       </section>
