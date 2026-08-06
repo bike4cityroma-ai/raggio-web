@@ -47,6 +47,14 @@ textarea::placeholder { color:#8b9994; }
 .send { flex:0 0 auto; width:42px; height:42px; border:0; border-radius:13px; background:var(--bright); color:white; cursor:pointer; font-weight:900; }
 .send:disabled { cursor:not-allowed; opacity:.45; }
 .privacy-line { margin:8px 5px 0; text-align:center; color:var(--muted); font-size:11px; }
+.composer-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 4px 0; color:var(--muted); font-size:11px; }
+.attach-photo { border:1px solid rgba(22,120,74,.28); border-radius:999px; padding:8px 12px; background:transparent; color:var(--green); cursor:pointer; font-size:12px; font-weight:800; }
+.attach-photo:hover,.attach-photo:focus-visible { background:rgba(22,120,74,.08); outline:none; }.attach-photo:disabled{opacity:.45;cursor:not-allowed}
+.selected-photo { display:grid; grid-template-columns:54px 1fr auto; gap:10px; align-items:center; margin-bottom:10px; padding:8px; border:1px solid var(--line); border-radius:14px; background:white; }
+.selected-photo img { width:54px; height:54px; object-fit:cover; border-radius:10px; }.selected-photo div{display:flex;flex-direction:column;gap:3px}.selected-photo span{color:var(--muted);font-size:11px}.selected-photo button{border:0;background:transparent;color:#a13e22;cursor:pointer;font-size:11px;font-weight:800}
+.photo-error { margin-bottom:8px; padding:9px 11px; border-radius:10px; background:#fff0e9; color:#7a321a; font-size:12px; }
+.photo-consent-backdrop { position:fixed; inset:0; z-index:20; display:grid; place-items:center; padding:20px; background:rgba(0,0,0,.62); }
+.photo-consent { width:min(460px,100%); padding:20px; border-radius:22px; background:var(--paper); box-shadow:0 24px 80px rgba(0,0,0,.35); }.photo-consent h2{margin:0 0 12px;font-size:22px}.photo-consent img{width:100%;max-height:240px;object-fit:contain;border-radius:14px;background:#e8ebe5}.photo-consent p{color:var(--muted);font-size:13px;line-height:1.5}.consent-actions{display:flex;gap:10px;justify-content:flex-end}.consent-actions button{padding:10px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;cursor:pointer;font-weight:800}.consent-actions .confirm-photo{border-color:var(--green);background:var(--green);color:white}
 .setup-warning { padding:10px 14px; background:#fff1d7; color:#705018; font-size:12px; text-align:center; }
 .workshop-contact { align-self:stretch; display:flex; flex-direction:column; gap:8px; padding:16px; border:1px solid rgba(22,120,74,.24); border-radius:18px; background:#f1f7ed; color:var(--ink); }
 .workshop-contact span { color:var(--muted); font-size:13px; line-height:1.45; }
