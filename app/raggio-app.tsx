@@ -7,8 +7,9 @@ import { getFunctions, httpsCallable } from "firebase/functions";
 import { deleteObject, getStorage, ref, uploadBytes } from "firebase/storage";
 
 type Role = "USER" | "ASSISTANT";
-type Message = { id: string; role: Role; text: string; safety?: "SAFE" | "CAUTION" | "STOP" };
-type ResponseData = { assistantMessage:string; safetyLevel:"SAFE"|"CAUTION"|"STOP"; outcome:"UNDETERMINED"|"GREEN"|"YELLOW"|"RED"; category:string; quickReplies:string[]; conversationCompleted:boolean };
+type Instruction = { title:string; body:string; warnings:string[] };
+type Message = { id: string; role: Role; text: string; safety?: "SAFE" | "CAUTION" | "STOP"; instruction?: Instruction | null };
+type ResponseData = { assistantMessage:string; messageType:"QUESTION"|"INSTRUCTION"|"WARNING"|"SUMMARY"; safetyLevel:"SAFE"|"CAUTION"|"STOP"; outcome:"UNDETERMINED"|"GREEN"|"YELLOW"|"RED"; category:string; quickReplies:string[]; instruction:Instruction|null; conversationCompleted:boolean };
 type PreparedPhoto = { blob:Blob; previewUrl:string; width:number; height:number };
 
 const firebaseConfig = {
@@ -119,7 +120,7 @@ export function RaggioApp() {
         throw error;
       }
       const data = result.data as ResponseData;
-      setMessages((current) => [...current,{id:newId(),role:"ASSISTANT",text:data.assistantMessage,safety:data.safetyLevel}]);
+      setMessages((current) => [...current,{id:newId(),role:"ASSISTANT",text:data.assistantMessage,safety:data.safetyLevel,instruction:data.instruction}]);
       setQuickReplies(data.conversationCompleted ? [] : data.quickReplies ?? []);
       setCategory(data.category);
       setShowWorkshopContact(data.conversationCompleted && (data.outcome === "YELLOW" || data.outcome === "RED"));
@@ -156,7 +157,7 @@ export function RaggioApp() {
         <div className="chat-head"><div className="chat-identity"><img className="chat-logo" src="/raggio_logo.png" alt=""/><div><div className="chat-title">Diagnosi guidata</div><div className="chat-subtitle">Raggiò · assistente online</div></div></div><button className="new-chat" type="button" onClick={resetChat} aria-label="Inizia una nuova conversazione">Nuova diagnosi</button></div>
         {!configured && <div className="setup-warning">Anteprima: il collegamento Firebase sarà attivato prima della pubblicazione.</div>}
         <div className="messages" aria-live="polite">
-          {messages.map((message) => <div key={message.id} className={`message ${message.role === "USER" ? "user" : "assistant"}${message.safety === "STOP" ? " stop" : ""}`}><div className="message-label">{message.role === "USER" ? "Tu" : message.safety === "STOP" ? "Fermati" : "RAGGIÒ"}</div>{message.text}</div>)}
+          {messages.map((message) => <div key={message.id} className={`message-group ${message.role === "USER" ? "user" : "assistant"}`}><div className={`message ${message.role === "USER" ? "user" : "assistant"}${message.safety === "STOP" ? " stop" : ""}`}><div className="message-label">{message.role === "USER" ? "Tu" : message.safety === "STOP" ? "Fermati" : "RAGGIÒ"}</div>{message.text}</div>{message.instruction && <section className="instruction-card" aria-label={message.instruction.title}><h3>{message.instruction.title}</h3><div className="instruction-body">{message.instruction.body.split(/\n+/).filter(Boolean).map((line,index)=><p key={`${message.id}-step-${index}`}><span>{index+1}</span>{line.replace(/^\s*(?:\d+[.)]|[-•])\s*/,"")}</p>)}</div>{message.instruction.warnings.length > 0 && <div className="instruction-warnings"><strong>Attenzione</strong>{message.instruction.warnings.map((warning,index)=><p key={`${message.id}-warning-${index}`}>{warning}</p>)}</div>}</section>}</div>)}
           {!loading && quickReplies.length > 0 && <div className="quick-replies">{quickReplies.map((reply) => <button type="button" className="quick-reply" key={reply} onClick={() => void send(reply)}>{reply}</button>)}</div>}
           {loading && <div className="typing" aria-label="Raggiò sta scrivendo"><span/><span/><span/></div>}<div ref={endRef}/>
           {showWorkshopContact && <aside className="workshop-contact" aria-label="Contatta la ciclofficina">
