@@ -174,7 +174,7 @@ export function RaggioApp() {
         </form>
       </section>
     </section>
-    <section className="details"><div className="details-inner"><div><h2>La stessa Raggiò,<br/>anche sul web.</h2><div className="partner-logos"><img src="/logo_incontropedale.png" alt="Ciclofficina InControPedale"/><img src="/logo_bike4city.png" alt="Bike4City Roma"/></div></div><div className="steps"><article className="step"><div className="step-num">01</div><h3>Racconta</h3><p>Spiega con parole tue il rumore, il comportamento o il componente che ti preoccupa.</p></article><article className="step"><div className="step-num">02</div><h3>Controlla</h3><p>Segui soltanto verifiche semplici e sicure, guidate una alla volta.</p></article><article className="step"><div className="step-num">03</div><h3>Decidi</h3><p>Ricevi un riepilogo prudente e capisci se rivolgerti alla ciclofficina.</p></article></div></div></section>
+    <section className="details"><div className="details-inner"><div className="partner-logos"><img src="/logo_incontropedale.png" alt="Ciclofficina InControPedale"/><img src="/logo_bike4city.png" alt="Bike4City Roma"/></div><div className="steps"><article className="step"><div className="step-num">01</div><h3>Racconta</h3><p>Spiega con parole tue il rumore, il comportamento o il componente che ti preoccupa.</p></article><article className="step"><div className="step-num">02</div><h3>Controlla</h3><p>Segui soltanto verifiche semplici e sicure, guidate una alla volta.</p></article><article className="step"><div className="step-num">03</div><h3>Decidi</h3><p>Ricevi un riepilogo prudente e capisci se rivolgerti alla ciclofficina.</p></article></div></div></section>
   </main>;
 }
 

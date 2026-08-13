@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-:root { --ink:#071f13; --muted:#52675b; --cream:#f8f6ed; --paper:#fffdf7; --orange:#f3b61f; --orange-dark:#176b9c; --green:#16784a; --bright:#74b72e; --line:rgba(7,31,19,.14); }
+:root { --ink:#123d2b; --muted:#52675b; --cream:#f8f6ed; --paper:#fffdf7; --orange:#f3b61f; --orange-dark:#176b9c; --green:#16784a; --bright:#74b72e; --line:rgba(7,31,19,.14); }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; }
 body { margin:0; color:var(--ink); background:var(--cream); font-family:"Trebuchet MS","Segoe UI",sans-serif; }
@@ -12,7 +12,7 @@ button,textarea { font:inherit; } button { color:inherit; }
 .status-pill { display:flex; align-items:center; gap:8px; padding:8px 12px; border:1px solid rgba(255,255,255,.2); border-radius:999px; background:rgba(255,255,255,.06); color:rgba(255,255,255,.76); font-size:13px; }
 .status-dot { width:8px; height:8px; border-radius:50%; background:var(--bright); }
 .hero { max-width:1180px; margin:0 auto; padding:54px 26px 72px; display:grid; grid-template-columns:minmax(0,.88fr) minmax(390px,1.12fr); gap:68px; align-items:center; }
-.raggio-logo { width:min(300px,72%); height:230px; object-fit:contain; object-position:left center; margin-bottom:8px; filter:drop-shadow(0 18px 30px rgba(0,0,0,.25)); }
+.raggio-logo { width:min(390px,90%); height:280px; object-fit:contain; object-position:left center; margin-bottom:8px; filter:drop-shadow(0 18px 30px rgba(0,0,0,.2)); }
 .eyebrow { color:var(--bright); font-size:16px; font-weight:800; letter-spacing:.04em; }
 h1 { margin:15px 0 20px; color:white; font-size:clamp(46px,5.6vw,72px); line-height:1; letter-spacing:-.04em; font-weight:900; }
 .lead { max-width:540px; color:rgba(255,255,255,.72); font-size:19px; line-height:1.58; }
@@ -61,12 +61,11 @@ textarea::placeholder { color:#8b9994; }
 .workshop-contact a { display:block; margin-top:3px; padding:12px 16px; border-radius:999px; background:#16784a; color:white; text-align:center; text-decoration:none; font-weight:900; }
 .workshop-contact a:hover,.workshop-contact a:focus-visible { background:#105d39; outline:3px solid rgba(116,183,46,.35); }
 .details { background:var(--cream); color:var(--ink); padding:68px 26px; }
-.details-inner { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:1fr 1.4fr; gap:70px; }
-.details h2 { margin:0; font-family:Georgia,serif; font-size:clamp(34px,4vw,55px); font-weight:500; }
+.details-inner { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:auto 1fr; gap:70px; align-items:start; }
 .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
 .step { border-top:1px solid var(--line); padding-top:18px; }.step-num{color:var(--green);font-weight:900;font-size:13px}.step h3{margin:30px 0 10px;font-size:17px}.step p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
-.partner-logos { display:flex; align-items:center; gap:16px; margin-top:28px; }.partner-logos img{width:120px;height:70px;object-fit:contain;background:white;border-radius:14px;padding:8px}
+.partner-logos { display:flex; align-items:center; gap:16px; }.partner-logos img{width:120px;height:70px;object-fit:contain;background:white;border-radius:14px;padding:8px}
 .embed .topbar,.embed .hero-copy,.embed .details{display:none}.embed .hero{display:block;max-width:none;padding:0}.embed .chat-card{min-height:100dvh;max-height:100dvh;border:0;border-radius:0;box-shadow:none}
 @media(max-width:900px){.hero{grid-template-columns:1fr;gap:42px;padding-top:30px}.hero-copy{text-align:center}.lead,.safety-note{margin-left:auto;margin-right:auto}.trust-row{justify-content:center}.chat-card{min-height:620px;max-height:none}.details-inner{grid-template-columns:1fr;gap:38px}}
-@media(max-width:580px){.topbar{padding:16px}.status-pill{display:none}.hero{padding:24px 12px 46px}h1{font-size:48px}.lead{font-size:17px}.chat-card{border-radius:20px;min-height:650px}.steps{grid-template-columns:1fr}.step h3{margin-top:12px}.message{max-width:91%}}
+@media(max-width:580px){.topbar{padding:16px}.status-pill{display:none}.hero{padding:24px 12px 46px}.raggio-logo{width:min(340px,96%);height:240px}h1{font-size:48px}.lead{font-size:17px}.chat-card{border-radius:20px;min-height:650px}.steps{grid-template-columns:1fr}.step h3{margin-top:12px}.message{max-width:91%}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important}}
