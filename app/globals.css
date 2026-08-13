@@ -73,7 +73,11 @@ textarea::placeholder { color:#8b9994; }
 .workshop-contact a { display:block; margin-top:3px; padding:12px 16px; border-radius:999px; background:#16784a; color:white; text-align:center; text-decoration:none; font-weight:900; }
 .workshop-contact a:hover,.workshop-contact a:focus-visible { background:#105d39; outline:3px solid rgba(116,183,46,.35); }
 .details { background:var(--cream); color:var(--ink); padding:68px 26px; }
-.details-inner { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:auto 1fr; gap:70px; align-items:start; }
+.details-inner { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:minmax(280px,.8fr) 1.4fr; gap:70px; align-items:start; }
+.workshop-info h2 { margin:22px 0 10px; max-width:330px; font-size:19px; line-height:1.35; }
+.workshop-address { display:inline-block; color:var(--green); font-size:14px; line-height:1.5; font-weight:800; text-underline-offset:3px; }
+.opening-hours { display:flex; flex-direction:column; gap:5px; margin-top:20px; color:var(--muted); font-size:14px; line-height:1.45; }
+.opening-hours strong { margin-bottom:2px; color:var(--ink); font-size:13px; text-transform:uppercase; letter-spacing:.05em; }
 .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
 .step { border-top:1px solid var(--line); padding-top:18px; }.step-num{color:var(--green);font-weight:900;font-size:13px}.step h3{margin:30px 0 10px;font-size:17px}.step p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
 .partner-logos { display:flex; align-items:center; gap:16px; }.partner-logos img{width:120px;height:70px;object-fit:contain;background:white;border-radius:14px;padding:8px}
