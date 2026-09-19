@@ -38,6 +38,7 @@ dev-error.log
 .vercel
 
 /dist/
+/dist-firebase/
 /.wrangler/
 /outputs/
 /work/

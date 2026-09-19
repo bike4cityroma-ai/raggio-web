@@ -35,11 +35,15 @@ export function RaggioApp() {
   const [pendingPhoto,setPendingPhoto] = useState<PreparedPhoto|null>(null);
   const [selectedPhoto,setSelectedPhoto] = useState<PreparedPhoto|null>(null);
   const [photoError,setPhotoError] = useState<string|null>(null);
-  const endRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isEmbed = useMemo(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("embed") === "1",[]);
 
-  useEffect(() => { endRef.current?.scrollIntoView({behavior:"smooth"}); },[messages,loading]);
+  useEffect(() => {
+    const messageList = messagesRef.current;
+    if (!messageList) return;
+    messageList.scrollTo({ top: messageList.scrollHeight, behavior: "smooth" });
+  },[messages,loading]);
 
   function resetChat() {
     setMessages([welcome]); setQuickReplies(["Sento un rumore","La bici frena male","Ho una gomma sgonfia"]);
@@ -149,17 +153,17 @@ export function RaggioApp() {
         <img className="raggio-logo" src="/raggio_logo.png" alt="Raggiò, il ciclomeccanico virtuale"/>
         <div className="eyebrow">L’assistente della ciclofficina</div>
         <h1>Come possiamo<br/>aiutarti?</h1>
-        <p className="lead">Descrivi il problema: Raggiò ti farà domande semplici e ti proporrà un controllo alla volta, proprio come nell’app Android.</p>
+        <p className="lead">Descrivi il problema: Raggiò ti guiderà prima nelle piccole riparazioni che puoi fare in sicurezza. Se mancano attrezzi, esperienza o il problema è delicato, ti consiglierà la ciclofficina.</p>
         <div className="trust-row"><div className="trust-item"><span className="trust-icon">✓</span> Guida passo passo</div><div className="trust-item"><span className="trust-icon">!</span> Priorità alla sicurezza</div><div className="trust-item"><span className="trust-icon">◌</span> Nessun account richiesto</div></div>
-        <p className="safety-note"><strong>Prima la sicurezza.</strong> Raggiò non sostituisce un meccanico. In presenza di problemi a freni, ruote, sterzo, telaio, forcella o batteria, non utilizzare la bicicletta.</p>
+        <p className="safety-note"><strong>Prima la sicurezza.</strong> Raggiò non sostituisce un meccanico. Non usare la bici se freni, ruote o sterzo sono instabili, se telaio o forcella sono lesionati oppure se la batteria è calda, gonfia o danneggiata.</p>
       </div>
       <section className="chat-card" aria-label="Chat con Raggiò">
         <div className="chat-head"><div className="chat-identity"><img className="chat-logo" src="/raggio_logo.png" alt=""/><div><div className="chat-title">Diagnosi guidata</div><div className="chat-subtitle">Raggiò · assistente online</div></div></div><button className="new-chat" type="button" onClick={resetChat} aria-label="Inizia una nuova conversazione">Nuova diagnosi</button></div>
         {!configured && <div className="setup-warning">Anteprima: il collegamento Firebase sarà attivato prima della pubblicazione.</div>}
-        <div className="messages" aria-live="polite">
+        <div className="messages" ref={messagesRef} aria-live="polite">
           {messages.map((message) => <div key={message.id} className={`message-group ${message.role === "USER" ? "user" : "assistant"}`}><div className={`message ${message.role === "USER" ? "user" : "assistant"}${message.safety === "STOP" ? " stop" : ""}`}><div className="message-label">{message.role === "USER" ? "Tu" : message.safety === "STOP" ? "Fermati" : "RAGGIÒ"}</div>{message.text}</div>{message.instruction && <section className="instruction-card" aria-label={message.instruction.title}><h3>{message.instruction.title}</h3><div className="instruction-body">{message.instruction.body.split(/\n+/).filter(Boolean).map((line,index)=><p key={`${message.id}-step-${index}`}><span>{index+1}</span>{line.replace(/^\s*(?:\d+[.)]|[-•])\s*/,"")}</p>)}</div>{message.instruction.warnings.length > 0 && <div className="instruction-warnings"><strong>Attenzione</strong>{message.instruction.warnings.map((warning,index)=><p key={`${message.id}-warning-${index}`}>{warning}</p>)}</div>}</section>}</div>)}
           {!loading && quickReplies.length > 0 && <div className="quick-replies">{quickReplies.map((reply) => <button type="button" className="quick-reply" key={reply} onClick={() => void send(reply)}>{reply}</button>)}</div>}
-          {loading && <div className="typing" aria-label="Raggiò sta scrivendo"><span/><span/><span/></div>}<div ref={endRef}/>
+          {loading && <div className="typing" aria-label="Raggiò sta scrivendo"><span/><span/><span/></div>}
           {showWorkshopContact && <aside className="workshop-contact" aria-label="Contatta la ciclofficina">
             <strong>Ti consigliamo di passare in ciclofficina.</strong>
             <span>Scrivici subito su WhatsApp per concordare un controllo della bici.</span>
@@ -175,7 +179,7 @@ export function RaggioApp() {
         </form>
       </section>
     </section>
-    <section className="details"><div className="details-inner"><div className="workshop-info"><div className="partner-logos"><img src="/logo_incontropedale.png" alt="Ciclofficina InControPedale"/><img src="/logo_bike4city.png" alt="Bike4City Roma"/></div><h2>Ciclofficina InControPedale e Bike4City</h2><a className="workshop-address" href="https://www.google.com/maps/search/?api=1&query=Via%20di%20Casal%20Bruciato%2011%2C%2000159%20Roma" target="_blank" rel="noreferrer">Via di Casal Bruciato 11 · 00159 Roma</a><div className="opening-hours"><strong>Orari di apertura</strong><span>Giovedì 16:00–19:30</span><span>Sabato 10:30–13:30</span></div></div><div className="steps"><article className="step"><div className="step-num">01</div><h3>Racconta</h3><p>Spiega con parole tue il rumore, il comportamento o il componente che ti preoccupa.</p></article><article className="step"><div className="step-num">02</div><h3>Controlla</h3><p>Segui soltanto verifiche semplici e sicure, guidate una alla volta.</p></article><article className="step"><div className="step-num">03</div><h3>Decidi</h3><p>Ricevi un riepilogo prudente e capisci se rivolgerti alla ciclofficina.</p></article></div></div><footer className="legal-footer"><p>© 2026 Ciclofficina InControPedale e Bike4City. Tutti i diritti riservati.</p><p>Raggiò offre un primo orientamento e non sostituisce il controllo di un meccanico qualificato.</p><nav aria-label="Informazioni legali"><a href="/privacy">Informativa privacy</a><a href="https://wa.me/393516849832" target="_blank" rel="noreferrer">Contatti</a></nav><p className="technology-note">Servizio realizzato con tecnologie Firebase di Google e OpenAI. I relativi nomi e marchi appartengono ai rispettivi titolari.</p></footer></section>
+    <section className="details"><div className="details-inner"><div className="workshop-info"><div className="partner-logos"><img src="/logo_incontropedale.png" alt="Ciclofficina InControPedale"/><img src="/logo_bike4city.png" alt="Bike4City Roma"/></div><h2>Ciclofficina InControPedale e Bike4City</h2><a className="workshop-address" href="https://www.google.com/maps/search/?api=1&query=Via%20di%20Casal%20Bruciato%2011%2C%2000159%20Roma" target="_blank" rel="noreferrer">Via di Casal Bruciato 11 · 00159 Roma</a><div className="opening-hours"><strong>Orari di apertura</strong><span>Giovedì 16:00–19:30</span><span>Sabato 10:30–13:30</span></div></div><div className="steps"><article className="step"><div className="step-num">01</div><h3>Racconta</h3><p>Spiega con parole tue il rumore, il comportamento o il componente che ti preoccupa.</p></article><article className="step"><div className="step-num">02</div><h3>Ripara</h3><p>Se il problema è semplice, segui una procedura pratica con attrezzi, passaggi e controlli finali.</p></article><article className="step"><div className="step-num">03</div><h3>Chiedi aiuto</h3><p>Se non riesci, non hai gli attrezzi o emerge un rischio, Raggiò ti indirizza alla ciclofficina.</p></article></div></div><footer className="legal-footer"><p>© 2026 Ciclofficina InControPedale e Bike4City. Tutti i diritti riservati.</p><p>Raggiò offre un primo orientamento e non sostituisce il controllo di un meccanico qualificato.</p><nav aria-label="Informazioni legali"><a href="/privacy">Informativa privacy</a><a href="https://wa.me/393516849832" target="_blank" rel="noreferrer">Contatti</a></nav><p className="technology-note">Servizio realizzato con tecnologie Firebase di Google e OpenAI. I relativi nomi e marchi appartengono ai rispettivi titolari.</p></footer></section>
   </main>;
 }
 
