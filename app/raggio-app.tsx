@@ -11,6 +11,8 @@ type Instruction = { title:string; body:string; warnings:string[] };
 type Message = { id: string; role: Role; text: string; safety?: "SAFE" | "CAUTION" | "STOP"; instruction?: Instruction | null };
 type ResponseData = { assistantMessage:string; messageType:"QUESTION"|"INSTRUCTION"|"WARNING"|"SUMMARY"; safetyLevel:"SAFE"|"CAUTION"|"STOP"; outcome:"UNDETERMINED"|"GREEN"|"YELLOW"|"RED"; category:string; quickReplies:string[]; instruction:Instruction|null; conversationCompleted:boolean };
 type PreparedPhoto = { blob:Blob; previewUrl:string; width:number; height:number };
+type AnalyticsEvent = "app_open" | "diagnosis_started" | "diagnosis_completed" | "photo_used" | "workshop_recommended" | "whatsapp_clicked";
+type AnalyticsSource = "direct" | "sito" | "card" | "locandina" | "gazebo" | "facebook" | "whatsapp" | "altro";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -23,6 +25,28 @@ const configured = Object.values(firebaseConfig).every(Boolean);
 const welcome: Message = { id:"welcome", role:"ASSISTANT", text:"Ciao! Sono Raggiò 🚲\nDimmi qual è il problema con la tua bici e ti aiuto subito!" };
 
 function newId() { return globalThis.crypto?.randomUUID?.() ?? `web-${Date.now()}-${Math.random().toString(16).slice(2)}`; }
+
+function readAnalyticsSource():AnalyticsSource {
+  if (typeof window === "undefined") return "direct";
+  const value = new URLSearchParams(window.location.search).get("src")?.toLowerCase();
+  const allowed:AnalyticsSource[] = ["direct","sito","card","locandina","gazebo","facebook","whatsapp","altro"];
+  return allowed.includes(value as AnalyticsSource) ? value as AnalyticsSource : "direct";
+}
+
+async function recordAnalytics(event:AnalyticsEvent,source:AnalyticsSource):Promise<void> {
+  if (!configured) return;
+  try {
+    const app = getApps()[0] ?? initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    if (!auth.currentUser) await signInAnonymously(auth);
+    const call = httpsCallable(getFunctions(app,"europe-west1"),"recordRaggioAnalytics");
+    await call({event,source});
+  } catch {
+    // Le statistiche non devono mai impedire l'utilizzo di Raggio.
+  }
+}
+
+let appOpenReported = false;
 
 export function RaggioApp() {
   const [messages,setMessages] = useState<Message[]>([welcome]);
@@ -37,7 +61,18 @@ export function RaggioApp() {
   const [photoError,setPhotoError] = useState<string|null>(null);
   const messagesRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const diagnosisStartedRef = useRef(false);
+  const diagnosisCompletedRef = useRef(false);
+  const workshopRecommendedRef = useRef(false);
   const isEmbed = useMemo(() => typeof window !== "undefined" && new URLSearchParams(window.location.search).get("embed") === "1",[]);
+  const analyticsSource = useMemo(() => readAnalyticsSource(),[]);
+
+  useEffect(() => {
+    if (!appOpenReported) {
+      appOpenReported = true;
+      void recordAnalytics("app_open",analyticsSource);
+    }
+  },[analyticsSource]);
 
   useEffect(() => {
     const messageList = messagesRef.current;
@@ -48,6 +83,9 @@ export function RaggioApp() {
   function resetChat() {
     setMessages([welcome]); setQuickReplies(["Sento un rumore","La bici frena male","Ho una gomma sgonfia"]);
     setCategory(null); setSessionId(newId()); setInput(""); setShowWorkshopContact(false); clearPhotos();
+    diagnosisStartedRef.current = false;
+    diagnosisCompletedRef.current = false;
+    workshopRecommendedRef.current = false;
   }
 
   function clearPhotos() {
@@ -106,12 +144,18 @@ export function RaggioApp() {
       const app = getApps()[0] ?? initializeApp(firebaseConfig);
       const auth = getAuth(app);
       if (!auth.currentUser) await signInAnonymously(auth);
+      if (!diagnosisStartedRef.current) {
+        diagnosisStartedRef.current = true;
+        void recordAnalytics("diagnosis_started",analyticsSource);
+      }
+      const usedPhoto = Boolean(selectedPhoto);
       let imageRef:ReturnType<typeof ref>|null = null;
       if (selectedPhoto) {
         const path = `ciclofficinaBotUsers/${auth.currentUser!.uid}/sessions/${sessionId}/photos/${newId()}.jpg`;
         imageRef = ref(getStorage(app),path);
         await uploadBytes(imageRef,selectedPhoto.blob,{
           contentType:"image/jpeg",
+          // eslint-disable-next-line react-hooks/purity
           customMetadata:{ expiresAtEpochMs:String(Date.now()+7*24*60*60*1000),width:String(selectedPhoto.width),height:String(selectedPhoto.height) },
         });
       }
@@ -127,7 +171,17 @@ export function RaggioApp() {
       setMessages((current) => [...current,{id:newId(),role:"ASSISTANT",text:data.assistantMessage,safety:data.safetyLevel,instruction:data.instruction}]);
       setQuickReplies(data.conversationCompleted ? [] : data.quickReplies ?? []);
       setCategory(data.category);
-      setShowWorkshopContact(data.conversationCompleted && (data.outcome === "YELLOW" || data.outcome === "RED"));
+      const recommendWorkshop = data.conversationCompleted && (data.outcome === "YELLOW" || data.outcome === "RED");
+      setShowWorkshopContact(recommendWorkshop);
+      if (usedPhoto) void recordAnalytics("photo_used",analyticsSource);
+      if (data.conversationCompleted && !diagnosisCompletedRef.current) {
+        diagnosisCompletedRef.current = true;
+        void recordAnalytics("diagnosis_completed",analyticsSource);
+      }
+      if (recommendWorkshop && !workshopRecommendedRef.current) {
+        workshopRecommendedRef.current = true;
+        void recordAnalytics("workshop_recommended",analyticsSource);
+      }
       removeSelectedPhoto();
     } catch {
       setMessages((current) => [...current,{id:newId(),role:"ASSISTANT",safety:"CAUTION",text:"Il servizio è temporaneamente non disponibile. Nessuna diagnosi è stata prodotta: attendi qualche secondo e riprova."}]);
@@ -167,7 +221,7 @@ export function RaggioApp() {
           {showWorkshopContact && <aside className="workshop-contact" aria-label="Contatta la ciclofficina">
             <strong>Ti consigliamo di passare in ciclofficina.</strong>
             <span>Scrivici subito su WhatsApp per concordare un controllo della bici.</span>
-            <a href="https://wa.me/393516849832?text=Ciao%2C%20ho%20appena%20completato%20una%20diagnosi%20con%20Raggi%C3%B2%20e%20vorrei%20far%20controllare%20la%20mia%20bici." target="_blank" rel="noreferrer">Contatta su WhatsApp</a>
+            <a href="https://wa.me/393516849832?text=Ciao%2C%20ho%20appena%20completato%20una%20diagnosi%20con%20Raggi%C3%B2%20e%20vorrei%20far%20controllare%20la%20mia%20bici." target="_blank" rel="noreferrer" onClick={()=>void recordAnalytics("whatsapp_clicked",analyticsSource)}>Contatta su WhatsApp</a>
           </aside>}
         </div>
         <form className="composer-wrap" onSubmit={submit}>
